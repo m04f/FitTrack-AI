@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import UserInfo
+from workout.models import Equipment
+
+from .models import UserEquipment, UserInfo
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -45,3 +47,9 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'fullname', 'bio', 'age', 'height', 'weight', 'gender', 'bmi', 'fitness_level', 'fitness_goal', 'frontend_settings']
+
+class UserEquipmentSerializer(serializers.ModelSerializer):
+    equipment = serializers.SlugRelatedField(queryset=Equipment.objects.all(), slug_field='name')
+    class Meta:
+        model = UserEquipment
+        fields = ['equipment']

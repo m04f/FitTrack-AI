@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db import transaction
 from django.db.utils import DatabaseError, IntegrityError
 
-from .models import Exercise, Muscle, Plan, PlanWorkout, Workout, WorkoutExercise
+from .models import Equipment, Exercise, Muscle, Plan, PlanWorkout, Workout, WorkoutExercise
 
 
 class MuscleSerializer(serializers.ModelSerializer):
@@ -13,10 +13,11 @@ class MuscleSerializer(serializers.ModelSerializer):
 
 class ExerciseSerializer(serializers.ModelSerializer):
     muscles = serializers.HyperlinkedRelatedField(view_name='muscle-details', many=True, queryset=Muscle.objects.all(), lookup_field='name')
+    equipments = serializers.SlugRelatedField(many=True, queryset=Equipment.objects.all(), slug_field='name')
 
     class Meta:
         model = Exercise
-        fields = ['name', 'description', 'muscles']
+        fields = ['name', 'description', 'muscles', 'equipments']
 
 
 class ExerciseWorkoutSerializer(serializers.ModelSerializer):
@@ -139,3 +140,11 @@ class PlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
         fields = ['uuid', 'creator', 'name', 'description', 'workouts',  'public']
+
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    exercises = serializers.PrimaryKeyRelatedField(many=True, source='exerciseequipment_set', read_only=True)
+
+    class Meta:
+        model = Equipment
+        fields = ['uuid', 'name', 'exercises']

@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-from .models import Exercise, Muscle, Workout, WorkoutExercise, Plan
-from .serializers import ExerciseSerializer, MuscleSerializer, WorkoutSerializer, ExerciseWorkoutSerializer, PlanSerializer
+from .models import Equipment, Exercise, Muscle, Workout, WorkoutExercise, Plan
+from .serializers import ExerciseSerializer, MuscleSerializer, WorkoutSerializer, ExerciseWorkoutSerializer, PlanSerializer, EquipmentSerializer
 from .filters import ExerciseFilter
 from .permissions import IsAuthorOrReadOnly, IsObjectVisible
 
@@ -81,3 +81,7 @@ class SingleMuscleView(generics.RetrieveAPIView):
     queryset = Muscle.objects.all()
     serializer_class = MuscleSerializer
     lookup_field = 'name'
+
+class EquipmentsView(generics.ListAPIView):
+    queryset = Equipment.objects.all()
+    serializer_class = EquipmentSerializer

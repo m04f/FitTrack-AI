@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ExerciseView, MuscleView, SingleWorkoutView, WorkoutsView, PlanView, SinglePlanView, SingleExerciseView, SingleMuscleView
+from .views import ExerciseView, MuscleView, SingleWorkoutView, WorkoutsView, PlanView, SinglePlanView, SingleExerciseView, SingleMuscleView, EquipmentsView
 
 urlpatterns = [
     path('exercises/', ExerciseView.as_view(), name='exercises'),
@@ -11,4 +11,5 @@ urlpatterns = [
     path('workouts/<uuid:pk>/', SingleWorkoutView.as_view(), name='workout-details'),
     path('plans/', PlanView.as_view(), name='plans'),
     path('plans/<uuid:pk>/', SinglePlanView.as_view(), name='plan-details'),
+    path('equipments/', EquipmentsView.as_view(), name='equipment'),
 ]

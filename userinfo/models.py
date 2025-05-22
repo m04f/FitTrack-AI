@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from workout.models import Plan
+from workout.models import Equipment, Plan
 
 class UserInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -24,3 +24,10 @@ class UserInfo(models.Model):
             models.CheckConstraint(check=models.Q(height__lte=200), name='height_lte_200'),
             models.CheckConstraint(check=models.Q(weight__lte=200), name='weight_lte_200'),
         ]
+
+class UserEquipment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'equipment')
