@@ -1,0 +1,9 @@
+Django
+djangorestframework
+django-channels
+daphne
+djoser
+django-cors-headers
+django-filter
+openai
+django-debug-toolbar

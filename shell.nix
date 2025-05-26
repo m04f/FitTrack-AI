@@ -8,15 +8,10 @@ let
 in
 mkShell {
   packages = with pkgs; [
-      nil
-      nodejs
-      nodePackages.npm
-      typescript-language-server
       prettierd
       (python.withPackages (python-pkgs: with python-pkgs; [
         openai
         python-lsp-server
-        ollama
         django
         channels
         daphne
@@ -25,8 +20,14 @@ mkShell {
         djangorestframework
         django-filter
         django-debug-toolbar
-        djangorestframework-simplejwt
         djoser
       ]))
   ];
+
+  # Add API key environment variable
+  shellHook = ''
+    set -a
+    [ -f .env ] && source .env
+    set +a
+  '';
 }
