@@ -98,3 +98,7 @@ The application uses the following environment variables:
 - `DEBUG`: Set to `False` for production
 - `SECRET_KEY`: Django secret key (change for production)
 - `ALLOWED_HOSTS`: Comma-separated list of allowed hosts for production
+
+### Frontend Integration
+
+The frontend implementation can be found at [FitTrack-AI Frontend](https://github.com/m04f/fittrack-ai-frontend).
