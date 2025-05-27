@@ -1,8 +1,14 @@
 {
+  "builds": [
+    {
+      "src": "fittrack_ai/asgi.py",
+      "use": "@vercel/python"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/wsgi.py"
+      "dest": "fittrack_ai/asgi.py"
     }
   ]
 }
