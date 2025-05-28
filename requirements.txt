@@ -1,6 +1,7 @@
 Django
 djangorestframework
 django-channels
+channels
 daphne
 djoser
 django-cors-headers
