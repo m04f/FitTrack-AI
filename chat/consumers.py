@@ -5,8 +5,9 @@ import json
 
 from .models import Message, ChatSession
 from .serializers import MessageSerializer
-from .prompts import personal_trainer_system_prompt
+from .prompts import personal_trainer_system_prompt, sys_prompt
 from .chatbot import ChatBot
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -18,9 +19,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         async for msg in Message.objects.filter(session_id=self.uuid):
             self.messages.append(msg)
 
-        if len(self.messages) == 0:
-            msg = await Message(session_id=self.uuid, role='system', content='You are an AI personal trainer.').asave()
-            self.messages.append(msg)
+        # if len(self.messages) == 0:
+        #     msg = await Message(session_id=self.uuid, role='system', content=sys_prompt()).asave()
+        #     self.messages.append(msg)
 
         self.bot = ChatBot(self.uuid)
 

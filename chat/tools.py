@@ -1,4 +1,7 @@
-from ollama import ChatResponse, Message
+from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
+import json
+
+from rest_framework.reverse import reverse
 
 from workout.models import Workout, Exercise, WorkoutExercise
 from django.db.models import Q
@@ -35,11 +38,11 @@ async def create_workout(name: str, description: str, exercises: list[dict]) -> 
             for exercise in exercises
         ]
         await WorkoutExercise.objects.abulk_create(workout_exercises)
-        return {"status": "success", "workout": workout}
+        return {"status": "success", "message": f'Workout added at {reverse("workout-details",kwargs={'pk': workout.uuid})}'}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-async def call_tool(tool: Message.ToolCall) -> dict:
+async def call_tool(tool: ChatCompletionMessageToolCall) -> dict:
     """
     Helper function to call a tool with the provided arguments.
 
@@ -51,10 +54,10 @@ async def call_tool(tool: Message.ToolCall) -> dict:
     Returns:
         dict: The result of the tool's function execution.
     """
-    function = availableTools.get(tool.function.name)
-    if not function:
-        return {"status": "error", "message": f"Function {tool['function']['name']} not found."}
-    return await function(**tool.function.arguments)
+    if tool.function.name == 'create_workout':
+        args = json.loads(tool.function.arguments)
+        return await create_workout(args['name'], args['description'], args['exercises'])
+
 
 create_workout_tool = {
     'type': 'function',
@@ -69,7 +72,7 @@ create_workout_tool = {
                 'description': {'type': 'string', 'description': 'A description of the workout'},
                 'exercises': {
                     'type': 'array',
-                    'description': 'A list of exercises with details',
+                    'description': 'A list of exercise names with details',
                     'items': {
                         'type': 'object',
                         'required': ['exercise_id', 'order'],
@@ -90,6 +93,6 @@ create_workout_tool = {
     }
 }
 
-availableTools = {
-    'create_workout': create_workout
-}
+availableTools = [
+    create_workout_tool
+]
