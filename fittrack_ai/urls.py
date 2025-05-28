@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^api/auth/', include('djoser.urls')),
     re_path(r'^api/auth/', include('djoser.urls.authtoken')),
-    path('api/chat/', include('chat.urls')),
+    # path('api/chat/', include('chat.urls')),
     path('api/', include('workout.urls')),
     path('api/', include('userinfo.urls')),
     path('api/user/', include('user_records.urls'))

@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'daphne',
+    # 'daphne',
     'channels',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djoser',
     'django_filters',
-    'chat',
+    # 'chat',
     'workout',
     'userinfo',
     'user_records',
@@ -159,7 +159,7 @@ CORS_ALLOWED_ORIGINS = [
         "http://localhost:8080",
 ]
 
-ASGI_APPLICATION = "fittrack_ai.asgi.application"
+# ASGI_APPLICATION = "fittrack_ai.asgi.application"
 
 INTERNAL_IPS = [
     "127.0.0.1",
