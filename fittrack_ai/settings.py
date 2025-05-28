@@ -166,9 +166,3 @@ ASGI_APPLICATION = "fittrack_ai.asgi.application"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
