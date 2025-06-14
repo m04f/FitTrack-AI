@@ -23,7 +23,7 @@ class DetailChatSessionView(generics.RetrieveAPIView, generics.DestroyAPIView):
     serializer_class = DetailChatSessionSerializer
 
     def get_object(self):
-        return get_object_or_404(ChatSession, pk=self.kwargs['pk'], user=self.request.user)
+        return get_object_or_404(ChatSession.objects.prefetch_related('message_set'), pk=self.kwargs['pk'], user=self.request.user)
 
 
 class ChatSessionMessagesView(generics.ListCreateAPIView):
