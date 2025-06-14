@@ -31,7 +31,7 @@ class ChatSessionMessagesView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
 
     def get_queryset(self):
-        return Message.objects.filter(session=self.kwargs['pk'], session__user=self.request.user).all()
+        return Message.objects.filter(session=self.kwargs['pk'], session__user=self.request.user, role__in=['user', 'assistant']).all()
 
     def chatbot(self, pk):
         return ChatBot(pk)
