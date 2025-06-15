@@ -1,6 +1,5 @@
-from asgiref.sync import sync_to_async, async_to_sync
 from django.contrib.auth.models import User
-from openai import AsyncOpenAI
+from openai import OpenAI
 import os
 
 from knowledge.models import Article
@@ -11,50 +10,46 @@ from .models import ChatSession, Message
 from .tools import availableTools, call_tool
 
 
-client = AsyncOpenAI(
+client = OpenAI(
     api_key=os.environ.get('API_KEY'),
     base_url=os.environ.get('OPENAI_BASE_URL')
 )
 
 
-async def sys_prompt():
+def sys_prompt():
     if sys_prompt.cache:
         return sys_prompt.cache
     available_exercises = '\n'.join(
         [f'{exercise.name}: {exercise.description}'
-        async for exercise in Exercise.objects.all()])
+        for exercise in Exercise.objects.all()])
     articles_text = '\n'.join(
         [(f'{article.name}:'
          f'```markdown'
          f'{article.content}'
          f'```')
-        async for article in Article.objects.all()])
+        for article in Article.objects.all()])
     sys_prompt.cache = {
         'role': 'system',
         'content':
-            'You are an AI personal trainer.'
-            'Your goal is to help users achieve their fitness goals by providing personalized workout plans and nutrition advice.'
-            'You should do one of the following:'
-            '- Modify a specific workout for a specific goal.'
-            '- Give nutrition advice according to the user\'s dietary needs.'
-            '- Create a new workout plan for a specific goal.' +
             available_exercises +
-            articles_text
+            articles_text +
+            'You are an AI personal trainer.'
+            'Your goal is to help users achieve their fitness goals by providing personalized workout and nutrition advice.'
+            'You should do one of the following:'
+            '- Give nutrition advice according to the user\'s dietary needs.'
+            '  The nutrition advice should be send to the user (no tool calls needed)'
+            '- Create a new workout based on user information.'
     }
     return sys_prompt.cache
 
 sys_prompt.cache = None
 
-@sync_to_async
-def get_user(session) -> User:
-    return session.user
-
-async def aget_user_info(session_uuid):
-    session = await ChatSession.objects.aget(uuid=session_uuid)
-    user = await get_user(session)
-    user_info = await UserInfo.objects.aget(user=user)
+def get_user_info(session_uuid):
+    session = ChatSession.objects.get(uuid=session_uuid)
+    user = session.user
+    user_info = UserInfo.objects.get(user=user)
     equipments = []
-    async for equipment in UserEquipment.objects.filter(user=user).select_related('equipment'):
+    for equipment in UserEquipment.objects.filter(user=user).select_related('equipment'):
         equipments.append(equipment.equipment.name)
     return {
         'role': 'system',
@@ -79,17 +74,14 @@ class ChatBot:
         self.uuid = uuid
         self.client = client
 
-    def send_message(self, msgs: list[Message]) -> list[Message]:
-        return async_to_sync(self.asend_message)(msgs)
-
-    async def asend_message(self, msgs: list[Message]):
+    def send_message(self, msgs: list[Message]):
             chat_msgs = [
-                await sys_prompt(),
-                await aget_user_info(self.uuid),
+                sys_prompt(),
+                get_user_info(self.uuid),
             ]
             for msg in msgs:
                 chat_msgs.append({'role': msg.role, 'content': msg.content})
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=os.environ.get('LLM_MODEL'),
                 messages=chat_msgs,
                 tools=availableTools,
@@ -104,9 +96,9 @@ class ChatBot:
                     chat_msgs.append({
                     'role': 'tool',
                     'tool_call_id': tool.id,
-                    'content': str(await call_tool(tool))
+                    'content': str(call_tool(tool))
                     })
-                    response = await self.client.chat.completions.create(
+                    response = self.client.chat.completions.create(
                         model=os.environ.get('LLM_MODEL'),
                         messages=chat_msgs,
                     )

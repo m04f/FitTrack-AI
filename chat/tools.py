@@ -7,14 +7,14 @@ from workout.models import Workout, WorkoutExercise
 from workout.serializers import WorkoutSerializer
 
 
-async def create_workout(data: dict) -> str:
+def create_workout(data: dict) -> str:
     serializer = WorkoutSerializer(data=data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return 'Workout created: ' + serializer.url
 
 
-async def call_tool(tool: ChatCompletionMessageToolCall):
+def call_tool(tool: ChatCompletionMessageToolCall):
     """
     Helper function to call a tool with the provided arguments.
 
@@ -26,7 +26,7 @@ async def call_tool(tool: ChatCompletionMessageToolCall):
     """
     if tool.function.name == 'create_workout':
         args = json.loads(tool.function.arguments)
-        return await create_workout(args)
+        return create_workout(args)
 
 
 create_workout_tool = {
