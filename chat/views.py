@@ -33,15 +33,12 @@ class ChatSessionMessagesView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Message.objects.filter(session=self.kwargs['pk'], session__user=self.request.user, role__in=['user', 'assistant']).all()
 
-    def chatbot(self, pk):
-        return ChatBot(pk)
-
     def post(self, request, pk, format=None):
         serializer = MessageSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save(session_id=pk)
-        chatbot = self.chatbot(pk)
+        chatbot = ChatBot(pk, request)
         messages = Message.objects.filter(session=self.kwargs['pk']).all()
         response = chatbot.send_message(list(messages))
         Message.objects.bulk_create(response)

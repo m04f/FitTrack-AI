@@ -70,9 +70,10 @@ def get_user_info(session_uuid):
     }
 
 class ChatBot:
-    def __init__(self, uuid):
+    def __init__(self, uuid, request):
         self.uuid = uuid
         self.client = client
+        self.request = request
 
     def send_message(self, msgs: list[Message]):
             chat_msgs = [
@@ -88,15 +89,12 @@ class ChatBot:
             )
             tool_calls = response.choices[0].message.tool_calls
             if tool_calls:
-                chat_msgs.append({
-                    'role': 'assistant',
-                    'content': response.choices[0].message.content or ''
-                })
+                chat_msgs.append(response.choices[0].message)
                 for tool in tool_calls:
                     chat_msgs.append({
                     'role': 'tool',
                     'tool_call_id': tool.id,
-                    'content': str(call_tool(tool))
+                    'content': str(call_tool(tool, self.request))
                     })
                     response = self.client.chat.completions.create(
                         model=os.environ.get('LLM_MODEL'),

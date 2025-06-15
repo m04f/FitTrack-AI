@@ -1,20 +1,23 @@
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
 import json
 
-from rest_framework.reverse import reverse
-
-from workout.models import Workout, WorkoutExercise
+from workout.models import Exercise
 from workout.serializers import WorkoutSerializer
 
 
-def create_workout(data: dict) -> str:
-    serializer = WorkoutSerializer(data=data)
+def create_workout(data: dict, request) -> str:
+    exercises = [
+        Exercise(name=exercise['exercise'])
+        for exercise in data['exercises']
+    ]
+    Exercise.objects.bulk_create(exercises, ignore_conflicts=True)
+    serializer = WorkoutSerializer(data=data, context={'request': request})
     serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return 'Workout created: ' + serializer.url
+    serializer.save(creator=request.user, public=False)
+    return 'Workout created: ' + serializer.data['url']
 
 
-def call_tool(tool: ChatCompletionMessageToolCall):
+def call_tool(tool: ChatCompletionMessageToolCall, request):
     """
     Helper function to call a tool with the provided arguments.
 
@@ -26,7 +29,7 @@ def call_tool(tool: ChatCompletionMessageToolCall):
     """
     if tool.function.name == 'create_workout':
         args = json.loads(tool.function.arguments)
-        return create_workout(args)
+        return create_workout(args, request)
 
 
 create_workout_tool = {
